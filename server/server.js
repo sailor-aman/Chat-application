@@ -71,9 +71,14 @@ app.use("/api/messages", messageRouter)
 
 
 
-// connect to MOngoDB
-await connectDB();
-
-
+// Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log("Server is running on PORT" + PORT));
+
+connectDB()
+    .then(() => {
+        server.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));
+    })
+    .catch((err) => {
+        console.error("Failed to connect to MongoDB:", err);
+        process.exit(1);
+    });

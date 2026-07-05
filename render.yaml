@@ -3,14 +3,24 @@ services:
     name: chat-app-server
     env: node
     plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && npm start
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/status
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
       - key: FRONTEND_URL
-        value: https://YOUR_VERCEL_FRONTEND_URL
+        value: https://YOUR_VERCEL_FRONTEND_URL.vercel.app
       - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
         sync: false
