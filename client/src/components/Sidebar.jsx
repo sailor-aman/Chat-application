@@ -10,6 +10,7 @@ const Sidebar = () => {
 
     // FIXED: Initialized as an empty string instead of a boolean value
     const [input, setInput] = useState("");
+    const [showMenu, setShowMenu] = useState(false);
     const navigate = useNavigate();
 
     // FIXED: Resolved spelling for input, toLowerCase(), and fullName matching backend layout
@@ -21,20 +22,34 @@ const Sidebar = () => {
         getUsers();
     }, [onlineUsers]);
 
+    useEffect(() => {
+        if (!showMenu) return;
+        const handleOutsideClick = () => setShowMenu(false);
+        window.addEventListener("click", handleOutsideClick);
+        return () => window.removeEventListener("click", handleOutsideClick);
+    }, [showMenu]);
+
     return (
         <div className={`bg-[#8185B2]/10 h-full p-5 rounded-l-2xl overflow-y-auto text-white ${selectedUser ? "max-md:hidden" : ''}`}>
             <div className='pb-5'>
                 <div className='flex justify-between items-center'>
                     <img src={assets.logo} alt='logo' className='max-w-40' />
 
-                    <div className='relative py-2 group'>
-                        <img src={assets.menu_icon} alt='Menu' className='max-h-5 cursor-pointer' />
+                    <div className='relative py-2'>
+                        <img 
+                            src={assets.menu_icon} 
+                            alt='Menu' 
+                            className='max-h-5 cursor-pointer' 
+                            onClick={(e) => { e.stopPropagation(); setShowMenu(prev => !prev); }}
+                        />
 
-                        <div className='absolute top-full right-0 z-20 w-36 p-4 rounded-md bg-[#282142] border border-gray-600 text-gray-100 hidden group-hover:block'>
-                            <p className='cursor-pointer text-sm hover:text-white' onClick={() => navigate('/profile')}>Edit Profile</p>
-                            <hr className='my-2 border-t border-gray-500' />
-                            <p onClick={() => logout()} className='cursor-pointer text-sm hover:text-white'>Logout</p>
-                        </div>
+                        {showMenu && (
+                            <div className='absolute top-full right-0 z-20 w-36 p-4 rounded-md bg-[#282142] border border-gray-600 text-gray-100'>
+                                <p className='cursor-pointer text-sm hover:text-white' onClick={() => { setShowMenu(false); navigate('/profile'); }}>Edit Profile</p>
+                                <hr className='my-2 border-t border-gray-500' />
+                                <p onClick={() => { setShowMenu(false); logout(); }} className='cursor-pointer text-sm hover:text-white'>Logout</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
