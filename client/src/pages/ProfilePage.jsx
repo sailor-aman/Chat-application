@@ -20,14 +20,41 @@ const ProfilePage = () => {
             return;
         }
 
+        // Compress high-resolution mobile photos client-side to prevent 413 Payload Too Large
         const reader = new FileReader();
         reader.readAsDataURL(selectedImg);
-        reader.onload = async () => {
-            const base64Image = reader.result;
-            await updateProfile({ profilePic: base64Image, fullName: name, bio })
-            navigate('/');
-        }
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = async () => {
+                const canvas = document.createElement("canvas");
+                const MAX_WIDTH = 300;
+                const MAX_HEIGHT = 300;
+                let width = img.width;
+                let height = img.height;
 
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const base64Image = canvas.toDataURL("image/jpeg", 0.7);
+                await updateProfile({ profilePic: base64Image, fullName: name, bio });
+                navigate('/');
+            }
+        }
     }
 
     return (
