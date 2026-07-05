@@ -160,8 +160,8 @@ const ChatContainer = () => {
                         key={index}
                         className={`relative group flex items-end gap-2 justify-end ${msg.senderId !== authUser._id && 'flex-row-reverse'}`}
                     >
-                        {/* Action buttons (Share / Delete), visible on hover */}
-                        <div className='opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 self-center mx-1'>
+                        {/* Action buttons (Share / Delete), visible on mobile and on hover for desktop */}
+                        <div className='opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-1 self-center mx-1'>
                             <button
                                 onClick={() => handleOpenShareModal(msg)}
                                 title="Forward Message"
