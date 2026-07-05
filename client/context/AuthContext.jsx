@@ -36,7 +36,8 @@ export const AuthProvider = ({ children }) => {
                 setAuthUser(data.user);
             }
         } catch (error) {
-            toast.error(error.message);
+            // Silently fail on initial auth check (e.g. backend sleeping or user not logged in)
+            console.log("Auth check failed:", error.message);
         }
     }
 
