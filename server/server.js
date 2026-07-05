@@ -12,15 +12,46 @@ import { Server } from "socket.io";
 const app = express();
 const server = http.createServer(app)
 
-// Initialize socket.io  server
+// Helper to check if an origin is allowed (allows localhost, any vercel.app domain, and FRONTEND_URL)
+const isOriginAllowed = (origin) => {
+    if (!origin) return true;
+    const cleanOrigin = origin.replace(/\/$/, "");
+    
+    // Allow localhost/127.0.0.1 on any port
+    if (cleanOrigin.startsWith("http://localhost:") || cleanOrigin.startsWith("http://127.0.0.1:") || cleanOrigin === "http://localhost" || cleanOrigin === "http://127.0.0.1") {
+        return true;
+    }
+    
+    // Allow any Vercel deployment URL
+    if (cleanOrigin.endsWith(".vercel.app")) {
+        return true;
+    }
+    
+    // Allow custom FRONTEND_URL if set
+    if (process.env.FRONTEND_URL) {
+        const cleanFrontendUrl = process.env.FRONTEND_URL.replace(/\/$/, "");
+        if (cleanOrigin === cleanFrontendUrl) {
+            return true;
+        }
+    }
+    
+    return false;
+};
 
+// Initialize socket.io server with dynamic CORS
 export const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        origin: (origin, callback) => {
+            if (!origin || isOriginAllowed(origin)) {
+                callback(null, true);
+            } else {
+                callback(null, false);
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true
     }
-})
+});
 // Store online users
 
 export const userSocketMap = {}; // {userId:socketId}
@@ -49,17 +80,16 @@ io.on("connection", (socket) => {
 
 
 
-const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
-    "http://localhost:5173",
-    "http://127.0.0.1:5173"
-].filter(Boolean);
-
 // Middleware setup
 app.use(express.json({ limit: "4mb" }));
 app.use(cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+        if (!origin || isOriginAllowed(origin)) {
+            callback(null, true);
+        } else {
+            callback(null, false);
+        }
+    },
     credentials: true
 }));
 
